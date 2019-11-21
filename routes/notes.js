@@ -33,17 +33,17 @@ router.get('/mynotes', passport.authenticate('jwt', { session: false }),
 );
 
 // Create new note
-router.get('/mynotes', passport.authenticate('jwt', { session: false }),
+router.post('/createnote', passport.authenticate('jwt', { session: false }),
     (req, res) => {
       var token = utils.getToken(req.headers);
       if (token) {
         Note
-          .findAll({
-            where: {
-              userId: req.user.id,
-            }
+          .create({
+            title: req.body.title,
+            body: req.body.body,
+            userId: req.user.id
           })
-          .then((notes) => res.status(200).send(notes))
+          .then((note) => res.status(201).send(note))
           .catch((error) => { res.status(400).send(error); });
       } else {
         return res.status(403).send({success: false, msg: 'Unauthorized.'});
