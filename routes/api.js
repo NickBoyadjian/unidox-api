@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const router = express.Router();
 require('../config/passport')(passport);
-const Product = require('../models').Product;
+const Note = require('../models').Note;
 const User = require('../models').User;
 
 router.post('/signup', function(req, res) {
@@ -39,9 +39,11 @@ router.post('/signin', (req, res) => {
         user.comparePassword(req.body.password, (err, isMatch) => {
         if(isMatch && !err) {
             var token = jwt.sign(JSON.parse(JSON.stringify(user)), 'nodeauthsecret', {expiresIn: 86400 * 30});
-            jwt.verify(token, 'nodeauthsecret', function(err, data){
-            console.log(err, data);
+
+            jwt.verify(token, 'nodeauthsecret', (err, data) => {
+              console.log(err, data);
             })
+
             res.json({success: true, token: 'JWT ' + token});
         } else {
             res.status(401).send({success: false, msg: 'Authentication failed. Wrong password.'});
@@ -54,6 +56,12 @@ router.post('/signin', (req, res) => {
 router.get('/', (req, res, next) => {
   res.render('api');
 });
+
+router.get('/profile', passport.authenticate('jwt', { session: false }),
+    (req, res) => {
+      res.send(req.user)
+    }
+  )
 
 getToken = (headers) => {
   if (headers && headers.authorization) {
