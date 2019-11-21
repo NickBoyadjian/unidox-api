@@ -1,3 +1,11 @@
+//     _         _   _       ____             _       
+//    / \  _   _| |_| |__   |  _ \ ___  _   _| |_ ___ 
+//   / _ \| | | | __| '_ \  | |_) / _ \| | | | __/ _ \
+//  / ___ \ |_| | |_| | | | |  _ < (_) | |_| | ||  __/
+// /_/   \_\__,_|\__|_| |_| |_| \_\___/ \__,_|\__\___|
+// ===================================================
+
+// Imports
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
@@ -6,7 +14,13 @@ require('../config/passport')(passport);
 const Note = require('../models').Note;
 const User = require('../models').User;
 
-router.post('/signup', function(req, res) {
+// Index route
+router.get('/', (req, res, next) => {
+  res.render('auth');
+});
+
+// Sign up
+router.post('/signup', (req, res) => {
   if (!req.body.username || !req.body.password) {
     res.status(400).send({msg: 'Please pass username and password.'})
   } else {
@@ -23,21 +37,22 @@ router.post('/signup', function(req, res) {
   }
 });
 
+// Sign in
 router.post('/signin', (req, res) => {
   User
     .findOne({
         where: {
-        username: req.body.username
+          username: req.body.username
         }
     })
     .then((user) => {
         if (!user) {
         return res.status(401).send({
-            message: 'Authentication failed. User not found.',
+            message: 'Username not found.',
         });
         }
         user.comparePassword(req.body.password, (err, isMatch) => {
-        if(isMatch && !err) {
+        if (isMatch && !err) {
             var token = jwt.sign(JSON.parse(JSON.stringify(user)), 'nodeauthsecret', {expiresIn: 86400 * 30});
 
             jwt.verify(token, 'nodeauthsecret', (err, data) => {
@@ -46,26 +61,23 @@ router.post('/signin', (req, res) => {
 
             res.json({success: true, token: 'JWT ' + token});
         } else {
-            res.status(401).send({success: false, msg: 'Authentication failed. Wrong password.'});
+            res.status(401).send({success: false, msg: 'Incorrect password.'});
         }
         })
     })
     .catch((error) => res.status(400).send(error));
 });
 
-router.get('/', (req, res, next) => {
-  res.render('api');
-});
-
+// Get profile
 router.get('/profile', passport.authenticate('jwt', { session: false }),
     (req, res) => {
       res.send(req.user)
     }
   )
 
-getToken = (headers) => {
+const getToken = (headers) => {
   if (headers && headers.authorization) {
-    var parted = headers.authorization.split(' ');
+    const parted = headers.authorization.split(' ');
     if (parted.length === 2) {
       return parted[1];
     } else {
