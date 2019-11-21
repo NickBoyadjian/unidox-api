@@ -13,6 +13,7 @@ const router = express.Router();
 require('../config/passport')(passport);
 const Note = require('../models').Note;
 const User = require('../models').User;
+const utils = require('../utils')
 
 // Index route
 router.get('/', (req, res, next) => {
@@ -74,18 +75,5 @@ router.get('/profile', passport.authenticate('jwt', { session: false }),
       res.send(req.user)
     }
   )
-
-const getToken = (headers) => {
-  if (headers && headers.authorization) {
-    const parted = headers.authorization.split(' ');
-    if (parted.length === 2) {
-      return parted[1];
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  }
-};
 
 module.exports = router;
