@@ -11,9 +11,9 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const router = express.Router();
 require('../config/passport')(passport);
-const Note = require('../models').Note;
-const User = require('../models').User;
 const utils = require('../utils')
+const user = require('../controllers/user')
+const note = require('../controllers/note')
 
 // Index route
 router.get('/', (req, res, next) => {
@@ -25,11 +25,7 @@ router.post('/signup', (req, res) => {
   if (!req.body.username || !req.body.password) {
     res.status(400).send({msg: 'Please pass username and password.'})
   } else {
-    User
-      .create({
-        username: req.body.username,
-        password: req.body.password
-      })
+      user.create(req.body.username, req.body.password)
       .then((user) => res.status(201).send(user))
       .catch((error) => {
         console.log(error);
@@ -40,12 +36,7 @@ router.post('/signup', (req, res) => {
 
 // Sign in
 router.post('/signin', (req, res) => {
-  User
-    .findOne({
-        where: {
-          username: req.body.username
-        }
-    })
+    user.get(req.body.username)
     .then((user) => {
         if (!user) {
         return res.status(401).send({
@@ -71,9 +62,22 @@ router.post('/signin', (req, res) => {
 
 // Get profile
 router.get('/profile', passport.authenticate('jwt', { session: false }),
-    (req, res) => {
-      res.send(req.user)
-    }
-  )
+  (req, res) => {
+    note.getUsersNotes(req.user.id)
+    .then((notes) => {
+      res.send({
+        id: req.user.id,
+        username: req.user.username,
+        notes: formatNotes(notes)
+      })
+    })
+  }
+)
+
+const formatNotes = notes => {
+  let res = [];
+  notes.forEach(note => res.push({id: note.id, title: note.title}))
+  return res;
+}
 
 module.exports = router;

@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const router = express.Router();
 const Note = require('../models').Note;
+const note = require('../controllers/note')
 const utils = require('../utils')
 
 // Get users notes
@@ -25,6 +26,20 @@ router.get('/mynotes', passport.authenticate('jwt', { session: false }),
             }
           })
           .then((notes) => res.status(200).send(notes))
+          .catch((error) => { res.status(400).send(error); });
+      } else {
+        return res.status(403).send({success: false, msg: 'Unauthorized.'});
+      }
+    }
+);
+
+// Get specific note
+router.get('/note/:id', passport.authenticate('jwt', { session: false }),
+    (req, res) => {
+      var token = utils.getToken(req.headers);
+      if (token) {
+        note.getNote(req.params.id, req.user.id)
+          .then((note) => note ? res.status(200).send(note) : res.send({msg: 'no note found'}))
           .catch((error) => { res.status(400).send(error); });
       } else {
         return res.status(403).send({success: false, msg: 'Unauthorized.'});

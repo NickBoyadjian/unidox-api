@@ -1,6 +1,7 @@
 'use strict';
 
 var bcrypt = require('bcrypt-nodejs');
+var Note = require('./note').Note
 
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
@@ -31,6 +32,11 @@ module.exports = (sequelize, DataTypes) => {
 
   User.associate = (models) => {
     User.hasMany(models.Note, {foreignKey: 'userId'});
+    User.belongsToMany(models.Note, {
+      through: 'noteUsers',
+      as: 'shared notes',
+      foreignKey: 'userId'
+    });
   };
   return User;
 };
