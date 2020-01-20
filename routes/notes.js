@@ -47,6 +47,23 @@ router.get('/note/:id', passport.authenticate('jwt', { session: false }),
     }
 );
 
+// Update a notes body
+router.put('/note/:id', passport.authenticate('jwt', { session: false }),
+    (req, res) => {
+      var token = utils.getToken(req.headers);
+      if (token) {
+        console.log('hii')
+        Note.update(
+          {body: req.body},
+          {returning: true, where: {id: req.params.id}}
+        )
+        .then(([ rowsUpdate, [updatedNote] ]) => { res.json(updatedNote) })
+      } else {
+        return res.status(403).send({success: false, msg: 'Unauthorized.'});
+      }
+    }
+);
+
 // Create new note
 router.post('/createnote', passport.authenticate('jwt', { session: false }),
     (req, res) => {

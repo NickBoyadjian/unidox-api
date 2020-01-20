@@ -39,9 +39,7 @@ router.post('/signin', (req, res) => {
     user.get(req.body.username)
     .then((user) => {
         if (!user) {
-        return res.status(401).send({
-            message: 'Username not found.',
-        });
+        return res.status(401).send({success: false, msg: 'User not found.'});
         }
         user.comparePassword(req.body.password, (err, isMatch) => {
         if (isMatch && !err) {

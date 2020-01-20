@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
     },
     title: DataTypes.STRING,
-    body: DataTypes.STRING,
+    body: DataTypes.JSON,
     userId: DataTypes.INTEGER
   }, {});
   Note.associate = function(models) {
