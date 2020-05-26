@@ -64,6 +64,24 @@ router.put('/note/:id', passport.authenticate('jwt', { session: false }),
     }
 );
 
+// Delete a note
+router.delete('/note/:id', passport.authenticate('jwt', { session: false }),
+    (req, res) => {
+      var token = utils.getToken(req.headers);
+      if (token) {
+        console.log('hii')
+        Note.destroy(
+          {where: {id: req.params.id}}
+        )
+        .then(r => res.send({success: true, msg: "Destroyed"}))
+        .catch(r => res.send({success: false, msg: "Note not found"}))
+
+      } else {
+        return res.status(403).send({success: false, msg: 'Unauthorized.'});
+      }
+    }
+);
+
 // Create new note
 router.post('/createnote', passport.authenticate('jwt', { session: false }),
     (req, res) => {
